@@ -170,7 +170,7 @@ namespace Leap.Unity.DetectionExamples {
          Vector3[] vertices = _mesh.vertices;
          int[] triangles = _mesh.triangles;
 
-                lineHandler.newMesh(vertices, UVs, triangles);
+                //lineHandler.newMesh(vertices, UVs, triangles);
                 networkManager.sendMessage(vertices, UVs, triangles);
                 //foreach(Vector3 vert in vertices)
                 //{

@@ -37,7 +37,7 @@ namespace Leap.Unity {
     private Camera _camera {
       get {
         if (_cachedCamera == null) {
-          _cachedCamera = GetComponent<Camera>();
+          _cachedCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>(); //GetComponent<Camera>();
         }
         return _cachedCamera;
       }

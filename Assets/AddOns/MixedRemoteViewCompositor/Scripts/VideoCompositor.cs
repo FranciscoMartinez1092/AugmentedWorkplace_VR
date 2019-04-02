@@ -39,12 +39,12 @@ namespace MixedRemoteViewCompositor
 
                     if (this.videoTexture == null)
                     {
-                        this.OnResolutionChanged(value.width, value.height);
-                    }
-                    else if (value != null && (value.width != this.videoTexture.width || value.height != this.videoTexture.height))
-                    {
-                        this.OnResolutionChanged(value.width, value.height);
-                    }
+                        this.OnResolutionChanged(value.width/2, value.height/2);
+                    } //TODO: TEMPorarily disable
+                    //else if (value != null && (value.width != this.videoTexture.width || value.height != this.videoTexture.height))
+                    //{
+                    //    this.OnResolutionChanged(value.width/2, value.height/2);
+                    //}
 
                     this.videoTexture = value;
                 }
@@ -110,6 +110,18 @@ namespace MixedRemoteViewCompositor
                 UnityEngine.Matrix4x4.Perspective(this.fov, this.aspectRatio, this.nearPlane, this.farPlane);
 
             this.sceneCamera.projectionMatrix = this.defaultCameraProjection;
+
+            // Move leap motion hand to camera
+            CameraPose? currentCameraPose = this.cameraTransform.ConvertWorldViewMatrix();
+            if (currentCameraPose == null)
+            {
+                currentCameraPose = this.lastGoodCameraTransform.ConvertWorldViewMatrix();
+            }
+            if (currentCameraPose != null)
+            {
+                this.transform.position = currentCameraPose.Value.Position;
+                this.transform.rotation = currentCameraPose.Value.Rotation;
+            }
         }
 
         private void OnDisable()
@@ -153,13 +165,14 @@ namespace MixedRemoteViewCompositor
             }
 
             // if screen dimensions have changed, adjust the viewport
-            if (Screen.width != this.lastScreenWidth || Screen.height != this.lastScreenHeight)
-            {
-                this.OnResolutionChanged(this.videoTexture.width, this.videoTexture.height);
+            // TODO: TEMPorarily disable
+            //if (Screen.width/2 != this.lastScreenWidth || Screen.height/2 != this.lastScreenHeight)
+            //{
+            //    this.OnResolutionChanged(this.videoTexture.width, this.videoTexture.height);
 
-                this.defaultCameraProjection =
-                    UnityEngine.Matrix4x4.Perspective(this.fov, this.aspectRatio, this.nearPlane, this.farPlane);
-            }
+            //    this.defaultCameraProjection =
+            //        UnityEngine.Matrix4x4.Perspective(this.fov, this.aspectRatio, this.nearPlane, this.farPlane);
+            //}
         }
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -224,13 +237,13 @@ namespace MixedRemoteViewCompositor
 
         private void OnResolutionChanged(int width, int height)
         {
-            this.sceneCamera.rect = this.GetViewport(width, height);
+            this.sceneCamera.rect = new Rect(0.5f, 0.5f, 0.5f, 0.5f);//this.GetViewport(width, height);
         }
 
         private Rect GetViewport(int imageWidth, int imageHeight)
         {
-            this.lastScreenWidth = Screen.width;
-            this.lastScreenHeight = Screen.height;
+            this.lastScreenWidth = Screen.width/2;
+            this.lastScreenHeight = Screen.height/2;
             float screenAspectRatio = Math.Abs((float) this.lastScreenWidth / (float) this.lastScreenHeight);
 
             this.fov = (float)imageWidth / (float)imageHeight;

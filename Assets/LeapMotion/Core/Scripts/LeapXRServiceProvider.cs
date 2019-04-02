@@ -178,8 +178,8 @@ namespace Leap.Unity {
     private Camera cachedCamera {
       get {
         if (_cachedCamera == null) {
-          _cachedCamera = GetComponent<Camera>();
-        }
+          _cachedCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>(); //GetComponent<Camera>();
+                }
         return _cachedCamera;
       }
     }
@@ -218,7 +218,7 @@ namespace Leap.Unity {
 
     protected override void Start() {
       base.Start();
-      _cachedCamera = GetComponent<Camera>();
+            _cachedCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>(); //GetComponent<Camera>();
       if (_deviceOffsetMode == DeviceOffsetMode.Transform && _deviceOrigin == null) {
         Debug.LogError("Cannot use the Transform device offset mode without " +
                        "specifying a Transform to use as the device origin.", this);

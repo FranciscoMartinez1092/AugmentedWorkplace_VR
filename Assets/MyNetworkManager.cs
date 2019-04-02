@@ -12,12 +12,27 @@ public class MyNetworkManager : MonoBehaviour
     {
         public static short hiMessage = MsgType.Highest + 1;
     };
+    public class AssetMessage
+    {
+        public static short assetMessage = MsgType.Highest + 2;
+    }
+
+    public class AssetsMessage : MessageBase
+    {
+        public NetworkHash128 assetId;
+    }
 
     public class PointsMessage : MessageBase
     {
         public Vector3[] vertices;
         public Vector2[] uvs;
         public int[] triangles;
+    }
+    public void sendAssetId(NetworkHash128 assetId)
+    {
+        AssetsMessage msg = new AssetsMessage();
+        msg.assetId = assetId;
+        NetworkServer.SendToAll(AssetMessage.assetMessage, msg);
     }
     public void sendMessage(Vector3[] vertices, Vector2[] uvs, int[] triangles)
     {
@@ -144,17 +159,18 @@ public class MyNetworkManager : MonoBehaviour
     public void OnClientReady(NetworkMessage netMsg) {
         Debug.Log("Client ready");
         NetworkServer.SetClientReady(netMsg.conn);
-        //GameObject cube = Instantiate(prefab.gameObject, Vector3.zero, Quaternion.identity);
-        //NetworkServer.Spawn(cube);
+        GameObject sphere = Instantiate(prefab.gameObject, Vector3.zero, Quaternion.identity);
+        NetworkServer.Spawn(sphere);
     }
     public void onServerReceiveConnect(NetworkMessage netMsg)
     {
         Debug.Log("Received a client connection");
+        sendAssetId(prefab.assetId);
     }
     // client function
     public void OnConnected(NetworkMessage netMsg)
     {
-        ClientScene.Ready(netMsg.conn);
+        //ClientScene.Ready(netMsg.conn);
         Debug.Log("Connected to server");
     }
 }
