@@ -3,36 +3,75 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-[NetworkSettings(channel = 6, sendInterval = (1.0f / 29.0f))]
+//[NetworkSettings(channel = 6, sendInterval = (1.0f / 29.0f))]
 public class CustomNetworkManager : MonoBehaviour
 {
+    public int port;
     public NetworkIdentity prefab;
-    public GameObject SceneRoot;
     public GameObject clientPrefab;
+    public GameObject SceneRoot;
+    public DrawLine lineHandler;
+    public GameObject SpatialMeshVR;
     public Material lineMaterial;
+    public Material surfaceMaterial;
+
     public bool isAtStartup = true;
     public bool isTheClient = true;
     public string serverAddress;
+
     NetworkClient myClient;
 
     public class CustomMessage
     {
         public static short lineMessage = MsgType.Highest + 1;
-    };
+    }
+    public class AssetMessage
+    {
+        public static short assetMessage = MsgType.Highest + 2;
+    }
+    public class SpatialMeshMsg
+    {
+        public static short meshMsg = MsgType.Highest + 3;
+    }
+
     public class PointsMessage : MessageBase
     {
         public Vector3[] vertices;
         public Vector2[] uvs;
         public int[] triangles;
     }
-    public class AssetMessage
+    public class ARLineMessage : MessageBase
     {
-        public static short assetMessage = MsgType.Highest + 2;
+        public Vector3[] pointPositions;
     }
-
     public class AssetsMessage : MessageBase
     {
         public NetworkHash128 assetId;
+    }
+    public void sendSpatialMesh(Vector3[] vertices, Vector2[] uvs, int[] triangles)
+    {
+        PointsMessage message = new PointsMessage();
+        message.vertices = vertices;
+        message.uvs = uvs;
+        message.triangles = triangles;
+        myClient.Send(SpatialMeshMsg.meshMsg, message);
+    }
+    public void onSpatialMeshMsg(NetworkMessage netMsg)
+    {
+        Debug.Log("Received spatial mesh message");
+        PointsMessage message = netMsg.ReadMessage<PointsMessage>();
+
+        // line object
+        GameObject surfaceObject = new GameObject("Surface Object");
+        surfaceObject.transform.SetParent(SpatialMeshVR.transform);
+
+        Mesh mesh = new Mesh();
+        surfaceObject.AddComponent<MeshFilter>().mesh = mesh;
+        mesh.vertices = message.vertices;
+        mesh.uv = message.uvs;
+        mesh.triangles = message.triangles;
+        surfaceObject.AddComponent<MeshRenderer>().material = surfaceMaterial;
+
     }
     public void sendAssetId(NetworkHash128 assetId)
     {
@@ -66,13 +105,21 @@ public class CustomNetworkManager : MonoBehaviour
         message.triangles = triangles;
         NetworkServer.SendToAll(CustomMessage.lineMessage, message);
     }
+    public void sendARLine(Vector3[] pointPositions)
+    {
+        ARLineMessage message = new ARLineMessage();
+        message.pointPositions = pointPositions;
+        myClient.Send(CustomMessage.lineMessage, message);
+    }
     public void onServerReceiveMessage(NetworkMessage msg)
     {
         // TODO: Add linerenderer drawing on server (VR) side
+        ARLineMessage message = msg.ReadMessage<ARLineMessage>();
+        lineHandler.SpawnLineGenerator(message.pointPositions);
     }
     public void onClientReceiveMessage(NetworkMessage msg)
     {
-        Debug.Log("Received message");
+        //Debug.Log("Received message");
         PointsMessage message = msg.ReadMessage<PointsMessage>();
 
         // line object
@@ -94,9 +141,9 @@ public class CustomNetworkManager : MonoBehaviour
     private GameObject SpawnSphere(Vector3 position, NetworkHash128 assetId)
     {
         GameObject clientObject = Instantiate(clientPrefab, position, Quaternion.identity);
+        //clientObject.transform.SetParent(SceneRoot.transform);
         clientObject.AddComponent<NetworkIdentity>();
-        clientObject.AddComponent<MyNetworkTransform>();
-        clientObject.transform.SetParent(SceneRoot.transform);
+        clientObject.AddComponent<NetworkTransform>();
         return clientObject;
     }
     private void UnspawnSphere(GameObject sphere)
@@ -105,6 +152,12 @@ public class CustomNetworkManager : MonoBehaviour
     }
     void Start()
     {
+        ConnectionConfig myConfig = new ConnectionConfig();
+        Debug.Log("Channels: " + myConfig.ChannelCount);
+        foreach (ChannelQOS channel in myConfig.Channels)
+        {
+            Debug.Log(channel);
+        }
         // setup code
         if (isTheClient)
         {
@@ -121,12 +174,14 @@ public class CustomNetworkManager : MonoBehaviour
     // Create a server and listen on a port
     public void SetupServer()
     {
-        NetworkServer.Listen(4444);
+        NetworkServer.Listen(port);
+        Debug.Log("Server active?: " + NetworkServer.active);
         isAtStartup = false;
         NetworkServer.RegisterHandler(MsgType.Connect, onServerReceiveConnect);
         NetworkServer.RegisterHandler(MsgType.Ready, OnClientReady);
         // Handle incoming line data
         NetworkServer.RegisterHandler(CustomMessage.lineMessage, onServerReceiveMessage);
+        NetworkServer.RegisterHandler(SpatialMeshMsg.meshMsg, onSpatialMeshMsg);
         //NetworkServer.RegisterHandler(MsgType.AddPlayer, OnAddPlayerMessage);
     }
     //void OnAddPlayerMessage(NetworkMessage netMsg)
@@ -146,7 +201,9 @@ public class CustomNetworkManager : MonoBehaviour
         myClient.RegisterHandler(AssetMessage.assetMessage, onAssetMsg);
         // Handle incoming line data
         myClient.RegisterHandler(CustomMessage.lineMessage, onClientReceiveMessage);
-        myClient.Connect(serverAddress, 4444);
+        Debug.Log("Attemping to connect");
+        myClient.Connect(serverAddress, port);
+        Debug.Log("Status: " + myClient.isConnected);
         isAtStartup = false;
     }
 
@@ -154,10 +211,7 @@ public class CustomNetworkManager : MonoBehaviour
     {
         Debug.Log("Client ready");
         NetworkServer.SetClientReady(netMsg.conn);
-        GameObject sphere = Instantiate(prefab.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
-        NetworkServer.Spawn(sphere);
-        sphere.transform.SetParent(SceneRoot.transform);
-
+        NetworkServer.Spawn(Instantiate(prefab.gameObject, new Vector3(0, 0, 0), Quaternion.identity));
     }
     public void onServerReceiveConnect(NetworkMessage netMsg)
     {
