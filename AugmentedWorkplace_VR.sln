@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AugmentedWorkplace_VR", "AugmentedWorkplace_VR.csproj", "{FED46556-A710-E3B2-FCAA-C840E0A693ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AugmentedWorkplace_VR.Plugins", "AugmentedWorkplace_VR.Plugins.csproj", "{BF1072A5-4C9A-49F6-D3A3-D62CA6F56CBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AugmentedWorkplace_VR.Editor", "AugmentedWorkplace_VR.Editor.csproj", "{1E8895FA-76FB-12A4-89A3-11EF3EACA4CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FED46556-A710-E3B2-FCAA-C840E0A693ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FED46556-A710-E3B2-FCAA-C840E0A693ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FED46556-A710-E3B2-FCAA-C840E0A693ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FED46556-A710-E3B2-FCAA-C840E0A693ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF1072A5-4C9A-49F6-D3A3-D62CA6F56CBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF1072A5-4C9A-49F6-D3A3-D62CA6F56CBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF1072A5-4C9A-49F6-D3A3-D62CA6F56CBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF1072A5-4C9A-49F6-D3A3-D62CA6F56CBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E8895FA-76FB-12A4-89A3-11EF3EACA4CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E8895FA-76FB-12A4-89A3-11EF3EACA4CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E8895FA-76FB-12A4-89A3-11EF3EACA4CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E8895FA-76FB-12A4-89A3-11EF3EACA4CC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
